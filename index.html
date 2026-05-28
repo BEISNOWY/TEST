@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#2563eb">
+  <title>Интерактивный тест ДиПАК</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="wrap">
+    <header class="header">
+      <div>
+        <h1>Интерактивный тест ДиПАК</h1>
+        <p class="muted">10 случайных вопросов · 10 минут · проходной балл 6/10</p>
+      </div>
+      <div class="pill" id="timerPill">⏱ 10:00</div>
+    </header>
+
+    <section id="start" class="card">
+      <h2>Подготовка к зачетному тесту</h2>
+      <p>При каждой попытке вопросы и варианты ответов перемешиваются. Выберите нужный режим подготовки.</p>
+      <div class="grid">
+        <div class="stat"><strong>10</strong><span>вопросов в зачете</span></div>
+        <div class="stat"><strong>10:00</strong><span>минут</span></div>
+        <div class="stat"><strong>6/10</strong><span>проходной балл</span></div>
+      </div>
+      <div class="mode-actions">
+        <button type="button" class="primary wide" id="startBtn">Режим зачета: 10 вопросов</button>
+        <button type="button" class="secondary wide" id="practiceBtn">Тренировка: все вопросы подряд</button>
+      </div>
+      <p class="small muted">В тренировке вопросы идут в случайном порядке, а правильность ответа показывается сразу.</p>
+      <p class="small muted">Работает без интернета: все картинки лежат в папке <code>assets</code>.</p>
+    </section>
+
+    <section id="quiz" class="card hidden">
+      <div class="topbar">
+        <div><strong id="counter">Вопрос 1 из 10</strong><div class="small muted" id="topic"></div></div>
+        <div class="progress"><div id="bar"></div></div>
+      </div>
+      <div class="question" id="question"></div>
+      <div class="qimage hidden" id="qimage"></div>
+      <div class="answers" id="answers"></div>
+      <div class="feedback hidden" id="feedback"></div>
+      <div class="actions">
+        <button type="button" class="secondary" id="prevBtn">Назад</button>
+        <button type="button" class="primary" id="nextBtn">Далее</button>
+      </div>
+    </section>
+
+    <section id="finish" class="card hidden result">
+      <h2>Результат</h2>
+      <div class="big" id="scoreText"></div>
+      <p id="passText"></p>
+      <div class="actions center">
+        <button type="button" class="primary" id="retryBtn">Новая попытка</button>
+        <button type="button" class="secondary" id="reviewBtn">Показать разбор</button>
+      </div>
+      <div class="review hidden" id="review"></div>
+    </section>
+  </main>
+
+<script src="script.js"></script>
+</body>
+</html>
