@@ -20,13 +20,17 @@
 
     <section id="start" class="card">
       <h2>Подготовка к зачетному тесту</h2>
-      <p>При каждой попытке вопросы и варианты ответов перемешиваются. В тест попадает 10 вопросов из общего банка.</p>
+      <p>При каждой попытке вопросы и варианты ответов перемешиваются. Выберите нужный режим подготовки.</p>
       <div class="grid">
-        <div class="stat"><strong>10</strong><span>вопросов</span></div>
+        <div class="stat"><strong>10</strong><span>вопросов в зачете</span></div>
         <div class="stat"><strong>10:00</strong><span>минут</span></div>
         <div class="stat"><strong>6/10</strong><span>проходной балл</span></div>
       </div>
-      <button type="button" class="primary wide" id="startBtn">Начать тест</button>
+      <div class="mode-actions">
+        <button type="button" class="primary wide" id="startBtn">Режим зачета: 10 вопросов</button>
+        <button type="button" class="secondary wide" id="practiceBtn">Тренировка: все вопросы подряд</button>
+      </div>
+      <p class="small muted">В тренировке вопросы идут в случайном порядке, а правильность ответа показывается сразу.</p>
       <p class="small muted">Работает без интернета: все картинки лежат в папке <code>assets</code>.</p>
     </section>
 
@@ -38,6 +42,7 @@
       <div class="question" id="question"></div>
       <div class="qimage hidden" id="qimage"></div>
       <div class="answers" id="answers"></div>
+      <div class="feedback hidden" id="feedback"></div>
       <div class="actions">
         <button type="button" class="secondary" id="prevBtn">Назад</button>
         <button type="button" class="primary" id="nextBtn">Далее</button>

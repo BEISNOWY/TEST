@@ -40,3 +40,9 @@ button:disabled { cursor:not-allowed; opacity:.55; transform:none; }
 .bad { color:var(--bad); font-weight:800; }
 code { background:#f3f4f6; padding:2px 5px; border-radius:6px; }
 @media (max-width: 700px) { .header { display:block; } .pill { margin-top:10px; } .grid { grid-template-columns:1fr; } .wrap { padding-top:16px; } .card { padding:18px; border-radius:20px; } .question { font-size:18px; } .actions { flex-direction:column; } .actions button { width:100%; } .qimage img { max-height: 300px; } }
+.mode-actions { display:grid; gap:10px; margin-top: 12px; }
+.feedback { margin-top:14px; padding:14px 16px; border-radius:16px; font-weight:800; }
+.feedback.ok { color:var(--good); background:#dcfce7; border:1px solid #bbf7d0; }
+.feedback.fail { color:var(--bad); background:#fee2e2; border:1px solid #fecaca; }
+.answer.correct { border-color:var(--good); background:#dcfce7; }
+.answer.incorrect { border-color:var(--bad); background:#fee2e2; }

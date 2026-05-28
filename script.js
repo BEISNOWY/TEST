@@ -472,9 +472,11 @@ var BANK = [
   }
 ];
 
-var TOTAL = 10;
+var EXAM_TOTAL = 10;
 var PASS = 6;
 var LIMIT = 10 * 60;
+var mode = 'exam';
+var activeTotal = EXAM_TOTAL;
 var questions = [];
 var current = 0;
 var answers = [];
@@ -508,23 +510,31 @@ function makeQuestion(item, idx) {
     opts: shuffle([item.c].concat(item.w))
   };
 }
-function startQuiz() {
-  var picked = shuffle(BANK).slice(0, TOTAL);
+function startQuiz(selectedMode) {
+  mode = selectedMode || 'exam';
+  var picked = mode === 'practice' ? shuffle(BANK) : shuffle(BANK).slice(0, EXAM_TOTAL);
+  activeTotal = picked.length;
   questions = [];
   for (var i = 0; i < picked.length; i++) questions.push(makeQuestion(picked[i], i));
   current = 0;
   answers = [];
-  for (var k = 0; k < TOTAL; k++) answers.push(null);
+  for (var k = 0; k < activeTotal; k++) answers.push(null);
   remaining = LIMIT;
   finished = false;
   $('start').classList.add('hidden');
   $('finish').classList.add('hidden');
   $('quiz').classList.remove('hidden');
   $('review').classList.add('hidden');
+  $('feedback').classList.add('hidden');
   $('timerPill').style.color = '';
-  $('timerPill').textContent = '⏱ ' + formatTime(remaining);
   if (timer) clearInterval(timer);
-  timer = setInterval(tick, 1000);
+  if (mode === 'practice') {
+    timer = null;
+    $('timerPill').textContent = 'Тренировка';
+  } else {
+    $('timerPill').textContent = '⏱ ' + formatTime(remaining);
+    timer = setInterval(tick, 1000);
+  }
   renderQuestion();
 }
 function tick() {
@@ -536,9 +546,10 @@ function tick() {
 }
 function renderQuestion() {
   var item = questions[current];
-  $('counter').textContent = 'Вопрос ' + (current + 1) + ' из ' + TOTAL;
-  $('topic').textContent = 'Выбрано ответов: ' + selectedCount() + '/' + TOTAL;
-  $('bar').style.width = Math.round((current / TOTAL) * 100) + '%';
+  $('counter').textContent = 'Вопрос ' + (current + 1) + ' из ' + activeTotal;
+  if (mode === 'practice') $('topic').textContent = 'Тренировка: правильность показывается сразу';
+  else $('topic').textContent = 'Выбрано ответов: ' + selectedCount() + '/' + activeTotal;
+  $('bar').style.width = Math.round(((current + 1) / activeTotal) * 100) + '%';
   $('question').textContent = item.q;
 
   var imageBox = $('qimage');
@@ -553,6 +564,7 @@ function renderQuestion() {
     imageBox.classList.add('hidden');
   }
 
+  var chosen = answers[current];
   var box = $('answers');
   box.innerHTML = '';
   for (var i = 0; i < item.opts.length; i++) {
@@ -561,17 +573,38 @@ function renderQuestion() {
       b.type = 'button';
       b.className = 'answer';
       b.textContent = opt;
-      if (answers[current] === opt) b.classList.add('selected');
-      b.addEventListener('click', function() { answers[current] = opt; renderQuestion(); }, false);
-      b.addEventListener('touchend', function(e) { e.preventDefault(); answers[current] = opt; renderQuestion(); }, false);
+      if (chosen === opt) b.classList.add('selected');
+      if (mode === 'practice' && chosen) {
+        if (opt === item.c) b.classList.add('correct');
+        if (chosen === opt && opt !== item.c) b.classList.add('incorrect');
+      }
+      b.addEventListener('click', function() { chooseAnswer(opt); }, false);
+      b.addEventListener('touchend', function(e) { e.preventDefault(); chooseAnswer(opt); }, false);
       box.appendChild(b);
     })(item.opts[i]);
   }
+  renderFeedback();
   $('prevBtn').disabled = current === 0;
-  $('nextBtn').textContent = current === TOTAL - 1 ? 'Завершить' : 'Далее';
+  $('nextBtn').textContent = current === activeTotal - 1 ? 'Завершить' : 'Далее';
+}
+function chooseAnswer(opt) {
+  if (mode === 'practice' && answers[current]) return;
+  answers[current] = opt;
+  renderQuestion();
+}
+function renderFeedback() {
+  var fb = $('feedback');
+  var item = questions[current];
+  var chosen = answers[current];
+  fb.className = 'feedback hidden';
+  fb.innerHTML = '';
+  if (mode !== 'practice' || !chosen) return;
+  var ok = chosen === item.c;
+  fb.className = ok ? 'feedback ok' : 'feedback fail';
+  fb.innerHTML = ok ? 'Верно!' : 'Неверно. Правильный ответ: <strong>' + escapeHtml(item.c) + '</strong>';
 }
 function next() {
-  if (current < TOTAL - 1) { current++; renderQuestion(); }
+  if (current < activeTotal - 1) { current++; renderQuestion(); }
   else finishQuiz();
 }
 function prev() {
@@ -582,11 +615,15 @@ function finishQuiz() {
   finished = true;
   if (timer) clearInterval(timer);
   var score = 0;
-  for (var i = 0; i < TOTAL; i++) if (answers[i] === questions[i].c) score++;
+  for (var i = 0; i < activeTotal; i++) if (answers[i] === questions[i].c) score++;
   $('quiz').classList.add('hidden');
   $('finish').classList.remove('hidden');
-  $('scoreText').textContent = score + '/' + TOTAL;
-  $('passText').innerHTML = score >= PASS ? '<span class="good">Зачет пройден.</span>' : '<span class="bad">Нужно повторить материал.</span>';
+  $('scoreText').textContent = score + '/' + activeTotal;
+  if (mode === 'practice') {
+    $('passText').innerHTML = '<span class="good">Тренировка завершена.</span> Правильных ответов: ' + score + ' из ' + activeTotal + '.';
+  } else {
+    $('passText').innerHTML = score >= PASS ? '<span class="good">Зачет пройден.</span>' : '<span class="bad">Нужно повторить материал.</span>';
+  }
   renderReview();
 }
 function renderReview() {
@@ -614,10 +651,11 @@ function bindButton(id, fn) {
   el.addEventListener('touchend', function(e) { e.preventDefault(); fn(); }, false);
 }
 function init() {
-  bindButton('startBtn', startQuiz);
+  bindButton('startBtn', function() { startQuiz('exam'); });
+  bindButton('practiceBtn', function() { startQuiz('practice'); });
   bindButton('nextBtn', next);
   bindButton('prevBtn', prev);
-  bindButton('retryBtn', startQuiz);
+  bindButton('retryBtn', function() { startQuiz(mode); });
   bindButton('reviewBtn', function() { $('review').classList.toggle('hidden'); });
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, false);
